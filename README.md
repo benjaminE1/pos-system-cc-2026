@@ -103,11 +103,15 @@ pos-system/
 # Crear la base de datos
 createdb pos_db
 
+createdb -U postgres pos_db
 # Ejecutar el schema
 psql -d pos_db -f database/schema.sql
 
+psql -U postgres -d pos_db -f database/schema.sql
 # Cargar datos de prueba
 psql -d pos_db -f database/seed.sql
+
+psql -U postgres -d pos_db -f database/seed.sql
 ```
 
 ### 2 — Backend
