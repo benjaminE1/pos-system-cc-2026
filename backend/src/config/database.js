@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const logger = require('../config/logger'); //logger importado
 
 // ⚠️  TODO: PROBLEMA DE SEGURIDAD - Credenciales hardcodeadas
 // En producción, TODAS las credenciales deben provenir de variables de entorno
@@ -9,6 +10,15 @@ const { Pool } = require('pg');
 // 1. Crear archivo .env con las credenciales reales (ver .env.example)
 // 2. Descomentar las líneas de process.env y eliminar los valores fijos
 
+//Validacion de seguridad (uso del .env en produccion)
+
+if (process.env.NODE_ENV === 'production'){
+  if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD){
+    logger.error('ERROR CRITICO: Faltan variables de entorno esenciales para la base de datos en produccion.');
+    process.exit(1); //Detener servidor
+  }
+}
+
 const pool = new Pool({
   host:     process.env.DB_HOST     || 'localhost',   // TODO: Solo variable de entorno
   port:     process.env.DB_PORT     || 5432,          // TODO: Solo variable de entorno
@@ -17,7 +27,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'postgres',    // TODO: Solo variable de entorno
 
   // TODO: Habilitar SSL para conexiones en producción (RDS, Cloud SQL, etc.)
-  // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 
   // TODO: Configurar pool según la carga esperada
   max:              10,
@@ -27,7 +37,7 @@ const pool = new Pool({
 
 // TODO: Implementar lógica de reconexión automática (retry) para alta disponibilidad
 pool.on('error', (err) => {
-  console.error('Error inesperado en el pool de conexiones:', err.message);
+  logger.error(`Error inesperado en el pool de conexiones: ${err.message}`);
   // TODO: Enviar alerta a sistema de monitoreo (CloudWatch, Datadog, etc.)
 });
 
