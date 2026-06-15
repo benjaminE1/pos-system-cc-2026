@@ -1,3 +1,5 @@
+require('dotenv').config();
+require('./monitoring');
 const app = require('./app');
 const logger = require('./config/logger'); //logger nuevo
 
